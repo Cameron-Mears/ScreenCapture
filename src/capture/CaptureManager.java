@@ -9,9 +9,12 @@ import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
+import java.io.IOException;
 
 import output.Renderer;
 import output.Window;
+import server.Client;
+import server.Server;
 
 public class CaptureManager extends Thread
 {
@@ -27,18 +30,22 @@ public class CaptureManager extends Thread
     private Renderer renderer;
     private Window window;
     private ScreenGraber screenGraber;
+    private AudioListener audioListener;
+    public static Server server;
 
-    public CaptureManager(int targetFrames)
+    public CaptureManager(int targetFrames, AudioListener Al)
     {
+        this.audioListener = Al;
         this.targetFrames = targetFrames;
         this.currentTime = System.currentTimeMillis();
         this.expectedTime = currentTime;
         this.deltaF = (long) 1000/targetFrames; //time delta between frames
         this.sleepTime = deltaF;
         this.sleepLoss = 0;
-        this.window = new Window("s", 1920, 1080, false, null,  GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()[0]);
-        this.renderer = new Renderer(window);
-        window.getWindow().setVisible(true);
+    
+        server = new Server();
+
+ 
         graphicsConfig = graphicsInit(graphicsConfig);
         this.screenGraber = new ScreenGraber(graphicsConfig.getDevice());
 
@@ -46,7 +53,7 @@ public class CaptureManager extends Thread
     }
 
     @Override
-    public void start()
+    public void run()
     {
         currentTime = System.currentTimeMillis();
         running = true;
@@ -64,13 +71,14 @@ public class CaptureManager extends Thread
         
             sleepLoss = currentTime - expectedTime;
             BufferedImage image = null;
-            Graphics2D g = renderer.createGraphics();
             image = screenGraber.grabFrame();
+            try {
+                server.write(image);
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+			}
             
-            
-            g.drawImage(image, 0, 0, null);
-            renderer.show(g);
-            frames++;
 
         }
 

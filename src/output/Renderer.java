@@ -26,6 +26,8 @@ public class Renderer extends Canvas
         {
             cursorImage = ImageIO.read(image);
         } catch (IOException e) {e.printStackTrace();}
+
+        
         
     }
 

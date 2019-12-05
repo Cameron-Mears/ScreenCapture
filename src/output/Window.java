@@ -22,6 +22,7 @@ public class Window {
         this.icon = icon;
         this.fullscreen = fullscreen;
 
+        
         frame.setTitle(title);
         frame.setLocation(-1920,0);
         frame.setSize(width, height);
